@@ -45,14 +45,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # 1. 최신 이미지 가져오기
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lucky-api:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/python-lucky:latest
             
             # 2. 기존 컨테이너 중지 및 삭제 (에러 무시)
             sudo docker stop my-server || true
             sudo docker rm my-server || true
             
             # 3. 새 컨테이너 실행
-            sudo docker run -d -p 8000:8000 --name my-server ${{ secrets.DOCKER_USERNAME }}/lucky-api:latest
+            sudo docker run -d -p 8000:8000 --name my-server ${{ secrets.DOCKER_USERNAME }}/python-lucky:latest
             
             # 4. (선택) 안 쓰는 구형 이미지 청소
             sudo docker image prune -f
