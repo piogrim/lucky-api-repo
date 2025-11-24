@@ -37,6 +37,18 @@ jobs:
     needs: build-and-push # 위 단계가 끝나야 실행됨
     runs-on: ubuntu-latest
     steps:
+      - name: 코드 내려받기(설정 파일 전송을 위해 필요)
+        uses: actions/checkout@v3
+
+      - name: 설정 파일 복사(docker-compose.yaml, nginx.conf)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY}}
+          source: "docker-compose.yaml, nginx.conf"
+          target: "/home/ec2-user/"
+
       - name: EC2 접속 및 배포
         uses: appleboy/ssh-action@master
         with:
@@ -44,15 +56,10 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. 최신 이미지 가져오기
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/python-lucky:latest
-            
-            # 2. 기존 컨테이너 중지 및 삭제 (에러 무시)
-            sudo docker stop my-server || true
-            sudo docker rm my-server || true
-            
-            # 3. 새 컨테이너 실행
-            sudo docker run -d -p 8000:8000 --name my-server ${{ secrets.DOCKER_USERNAME }}/python-lucky:latest
-            
-            # 4. (선택) 안 쓰는 구형 이미지 청소
+            cd /home/ec2-user
+
+            sudo docker-compose pull
+
+            sudo docker-compose up -d --remove-orphans
+
             sudo docker image prune -f
