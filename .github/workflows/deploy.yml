@@ -58,6 +58,8 @@ jobs:
           script: |
             cd /home/ec2-user
 
+            sudo docker rm -f my-server || true
+
             sudo docker-compose pull
 
             sudo docker-compose up -d --remove-orphans
